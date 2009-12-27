@@ -1,0 +1,12 @@
+commit e9d4b9cef4cb65380bc0ca7859c85a86c6f71975
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Sun Dec 27 20:16:08 2009 +0100
+
+    gitignore
+    Signed-off-by: Patrik Šíma <patrik@ovx.cz>
+
+commit 3680858f77a089cf273b1ae72ffbf5aa49ac5aa3
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Sun Dec 27 19:17:14 2009 +0100
+
+    first commit
