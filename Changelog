@@ -1,3 +1,33 @@
+commit c4d2ec8f8c85c3da6ba81379744a4af07aa8cdbe
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Fri Jan 8 23:34:05 2010 +0100
+
+    add,edit,del
+
+commit 9ec72c7c963f12efbd86309a9e359702a7177ed8
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Fri Jan 8 15:51:19 2010 +0100
+
+    db wrapper
+
+commit f8199ad3b77581f47889e17744300019d3de4396
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Fri Jan 8 12:29:30 2010 +0100
+
+    loans
+
+commit 4e5f90c7761dd61ef7e7523897e8017d46bac591
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Thu Jan 7 11:06:22 2010 +0100
+
+    todo
+
+commit 76a0c88b38c61573d2dcfa1c540cac741c777b23
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Sun Dec 27 20:54:59 2009 +0100
+
+    Changelog
+
 commit e9d4b9cef4cb65380bc0ca7859c85a86c6f71975
 Author: Patrik Šíma <patrik@ovx.cz>
 Date:   Sun Dec 27 20:16:08 2009 +0100
