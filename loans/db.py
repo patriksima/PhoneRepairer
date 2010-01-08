@@ -17,6 +17,9 @@ class DB(Singleton):
         sqlite3.register_adapter(bool, lambda x:int(x))
         sqlite3.register_converter('BOOLEAN', lambda x:bool(int(x)))
         
+        self.commit  = self.conn.commit
+        self.execute = self.curs.execute
+        
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]

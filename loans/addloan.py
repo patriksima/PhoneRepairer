@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import re, sqlite3
+import re
 import pygtk
 pygtk.require('2.0')
 import gtk
 
+from db import DB
+
 class AddLoanDlg(gtk.Dialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent, model):
         gtk.Dialog.__init__(self, "Add loan")
         
-        self.error = False
+        self.db = DB.getInstance()
+        self.model = model
+        
+        self.connect("delete-event", self.quit)
         
         # cmon dialog settings
         self.set_default_response(gtk.RESPONSE_OK)
@@ -20,9 +25,6 @@ class AddLoanDlg(gtk.Dialog):
         self.set_border_width(6)
         self.set_modal(True)
         
-        self.connect("destroy", self.quit)
-        self.connect("delete-event", self.quit)
-                
         # action area
         hbox = gtk.HButtonBox()
         hbox.set_layout(gtk.BUTTONBOX_END)
@@ -33,21 +35,6 @@ class AddLoanDlg(gtk.Dialog):
         hbox.add(btn1)
         hbox.add(btn2)
     
-        # init db
-        try:
-            self.conn = sqlite3.connect("./data.db", detect_types=sqlite3.PARSE_DECLTYPES)
-            self.curs = self.conn.cursor()
-        except sqlite3.OperationalError, e:
-            print "sqlite3: %s" % e
-        
-        sqlite3.register_adapter(str, lambda s:s.decode('utf-8'))
-        sqlite3.register_adapter(bool, lambda x:int(x))
-        sqlite3.register_converter('BOOLEAN', lambda x:bool(int(x)))
-        
-        self.curs.execute("CREATE TABLE IF NOT EXISTS types \
-        (id INTEGER PRIMARY KEY AUTOINCREMENT, type)")
-        self.conn.commit()
-        
         # widgets for checking
         self.elements = []
         
@@ -59,14 +46,14 @@ class AddLoanDlg(gtk.Dialog):
         label.set_alignment(1.0,0.5)
         self.table.attach(label, 0, 3, 1, 2)
         
-        combo = gtk.combo_box_new_text()
-        combo.append_text("--vyberte--")
-        self.curs.execute("SELECT type FROM types ORDER BY type")
-        for row in self.curs:
-            combo.append_text(row[0])
-        combo.set_active(0)
-        self.elements.append(combo)
-        self.table.attach(combo, 3, 10, 1, 2)
+        entry = gtk.Entry()
+        compl = gtk.EntryCompletion()
+        compl.set_model(self.create_types_store())
+        entry.set_completion(compl)
+        compl.set_text_column(0)
+
+        self.elements.append(entry)
+        self.table.attach(entry, 3, 10, 1, 2)
         
         label = gtk.Label("IMEI:")
         label.set_alignment(1.0,0.5)
@@ -114,14 +101,20 @@ class AddLoanDlg(gtk.Dialog):
         self.vbox.add(self.table)
         self.vbox.add(hbox)
         self.show_all()
-     
-    def errormsg(self, msg):
-        self.error = True
+    
+    def create_types_store(self):
+        lst = gtk.ListStore(str)
+        res = self.db.execute("SELECT type FROM loans GROUP BY type ORDER BY type")
+        for row in res:
+            lst.append([row[0]])
+        return lst
+        
+    def error_msg(self, msg):
         dlg = gtk.MessageDialog(self, gtk.DIALOG_DESTROY_WITH_PARENT, \
                                       gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, \
                                       msg)
         dlg.set_title("Chyba")
-        res = dlg.run()
+        dlg.run()
         dlg.hide()
 
     def cancel(self, widget):
@@ -129,44 +122,48 @@ class AddLoanDlg(gtk.Dialog):
         self.quit()
         
     def check(self, widget):
-        self.error = False
-        
-        if self.elements[0].get_active()==0:
-            return self.errormsg("Vyberte typ telefonu.")
+        if self.elements[0].get_text()=="":
+            return self.error_msg("Vyberte typ telefonu.")
             
         if self.elements[1].get_text()=="":
-            return self.errormsg("Zadejte IMEI.")
+            return self.error_msg("Zadejte IMEI.")
             
         if self.elements[2].get_text()=="":
-            return self.errormsg("Zadejte cenu.")
+            return self.error_msg("Zadejte cenu.")
             
         if not re.match(r"^[0-9]+(\.[0-9]+)?$",self.elements[2].get_text()):
-            return self.errormsg("Formát ceny není korektní.")
+            return self.error_msg("Formát ceny není korektní.")
 
-        if not self.error:
-            self.save()
-            self.response(gtk.RESPONSE_OK) 
-            self.quit() 
-
-    def save(self):
-        textbuff = self.elements[5].get_buffer()
-        start, end = textbuff.get_bounds()
-        c = ["type", "imei", "price", "battery", "charger", "other"]
-        k = ",".join(c)
-        v = ",".join(("?")*len(c))
-        query = "INSERT INTO loans (%s) VALUES (%s)" % (k, v)
-        self.curs.execute(query, (self.elements[0].get_active_text(), \
-                                  self.elements[1].get_text(), \
-                                  self.elements[2].get_text(), \
-                                  self.elements[3].get_active(), \
-                                  self.elements[4].get_active(), \
-                                  textbuff.get_text(start,end)))
-        self.conn.commit()
+        buff = self.elements[5].get_buffer()
+        s, e = buff.get_bounds()
+        
+        self.model.add(self.elements[0].get_text(), \
+                       self.elements[1].get_text(), \
+                       int(self.elements[2].get_text()), \
+                       self.elements[3].get_active(), \
+                       self.elements[4].get_active(), \
+                       buff.get_text(s, e))
+        
+        self.response(gtk.RESPONSE_OK)
+        self.quit()
 
     def quit(self, *dummy):
-        self.conn.close()
+        self.hide()
         self.destroy()
         
 if __name__ == "__main__":
-    dlg = AddLoanDlg()
-    print dlg.run()
+    def add(*dummy):
+        print type(dummy), dummy
+    model = gtk.ListStore(str)
+    model.add = add
+    
+    main = gtk.Window()
+    main.show()
+    main.connect("destroy", lambda x:gtk.main_quit())
+    
+    dlg = AddLoanDlg(main, model)
+    res = dlg.run()
+    if res == gtk.RESPONSE_OK:
+        print "good job sir"
+    
+    gtk.main()

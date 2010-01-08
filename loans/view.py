@@ -57,8 +57,8 @@ class View(gtk.TreeView):
         
         self.column5.set_reorderable(True)
         self.column5.set_resizable(True)
-        self.column5.set_sort_indicator(True)
-        self.column5.set_sort_column_id(5)
+        #self.column5.set_sort_indicator(True)
+        #self.column5.set_sort_column_id(5)
         
         self.set_search_column(1)
         self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
