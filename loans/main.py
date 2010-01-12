@@ -72,8 +72,34 @@ class MainWindow(gtk.Window):
         
     def draw_page (self, operation, context, page_number):
         cr = context.get_cairo_context()
-        cr.set_source_rgb(0, 0, 0)
 
+        cr.set_line_width(0.1)
+        cr.set_source_rgb(0, 0, 0)
+        cr.rectangle(0.0, 0.0, context.get_width(), context.get_height())
+        cr.stroke()
+        
+        cr.set_line_width(0.5)
+        cr.arc(context.get_width()/2, context.get_height()/2, 50, 0, 2*math.pi)
+        cr.stroke()   
+        cr.arc(context.get_width()/2, context.get_height()/2+10, 20, 15 * (math.pi/180), 165 * (math.pi/180))
+        cr.stroke()   
+        cr.arc(context.get_width()/2-18, context.get_height()/2-20, 5, 0, 2*math.pi)
+        cr.stroke()   
+        cr.arc(context.get_width()/2+18, context.get_height()/2-20, 5, 0, 2*math.pi)
+        cr.stroke()  
+        
+        layout = context.create_pango_layout()
+        layout.set_markup("by OVX")
+        layout.set_font_description(pango.FontDescription("sans 10"))
+        layout.set_alignment(pango.ALIGN_RIGHT)
+
+        w, h = layout.get_pixel_size()
+
+        cr.move_to(context.get_width()-w-5, context.get_height()-h-5)
+        cr.layout_path(layout)
+        cr.fill()
+ 
+        """
         start_line = page_number * self.lines_per_page
         if page_number + 1 != operation.props.n_pages:
             end_line = start_line + self.lines_per_page
@@ -96,8 +122,10 @@ class MainWindow(gtk.Window):
             i += 1
             if not (i < end_line and iter.next_line()):
                 break
+        """
 
     def begin_print(self, operation, context):
+        """
         width = context.get_width()
         height = context.get_height()
         self.layout = context.create_pango_layout()
@@ -113,7 +141,8 @@ class MainWindow(gtk.Window):
         print "lines_per_page: ", self.lines_per_page
         #lines = self.layout.get_line_count()
         pages = ( int(math.ceil( float(num_lines) / float(self.lines_per_page) ) ) )
-        operation.set_n_pages(pages)
+        """
+        operation.set_n_pages(1)
 
     def printing(self, *args):
         print "printing"
