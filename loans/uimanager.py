@@ -9,12 +9,17 @@ class UIManager(gtk.UIManager):
     ui = '''<ui>
     <menubar name="MenuBar">
       <menu action="File">
+        <menuitem action="Print"/>
+        <separator/>
         <menuitem action="Quit"/>
       </menu>
       <menu action="Loans">
         <menuitem action="Add"/>
         <menuitem action="Edit"/>
         <menuitem action="Del"/>
+      </menu>
+      <menu action="Help">
+        <menuitem action="About"/>
       </menu>
     </menubar>
     <toolbar name="ToolBar">
@@ -25,6 +30,8 @@ class UIManager(gtk.UIManager):
         <toolitem action="Edit"/>
         <toolitem action="Del"/>
       </placeholder>
+      <separator/>
+      <toolitem action="Print"/>
     </toolbar>
     </ui>'''
     
@@ -34,9 +41,12 @@ class UIManager(gtk.UIManager):
         self.actions = (('File', None, '_File'),
                             ('Quit', gtk.STOCK_QUIT, '_Quit', None, 'Quit', None),
                         ('Loans', None, '_Loans'),
-                            ('Add', None, '_Add', '<CTRL>A', 'Add loan', None),
-                            ('Edit', None, '_Edit', '<CTRL>E', 'Edit loan', None),
-                            ('Del', None, '_Del', '<CTRL>D', 'Delete loan', None))
+                            ('Add', gtk.STOCK_ADD, '_Add', '<CTRL>A', 'Add loan', None),
+                            ('Edit', gtk.STOCK_EDIT, '_Edit', '<CTRL>E', 'Edit loan', None),
+                            ('Del', gtk.STOCK_DELETE, '_Del', '<CTRL>D', 'Delete loan', None),
+                            ('Print', gtk.STOCK_PRINT, '_Print', '<CTRL>P', 'Print loans', None),
+                        ('Help', None, '_Help'),
+                            ('About', gtk.STOCK_ABOUT, 'About', None, 'About app', None))
         self.actiongroup.add_actions(self.actions)
         self.insert_action_group(self.actiongroup, 0)
         self.add_ui_from_string(self.ui)

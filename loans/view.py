@@ -61,7 +61,6 @@ class View(gtk.TreeView):
         #self.column5.set_sort_column_id(5)
         
         self.set_search_column(1)
-        self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
 
     def ColRenderer3(self, column, cell, model, iter):
         row = int(model.get_string_from_iter(iter))

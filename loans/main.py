@@ -5,11 +5,16 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
+import math
+import cairo
+import pango
+
 from model import Model
 from view import View
 
 from uimanager import UIManager
 
+from about import AboutDlg
 from addloan import AddLoanDlg
 from editloan import EditLoanDlg
 
@@ -28,9 +33,11 @@ class MainWindow(gtk.Window):
         self.add_accel_group(accelgroup)
         
         self.uimanager.get_action('/MenuBar/File/Quit').connect("activate", self.destroy)
+        self.uimanager.get_action('/MenuBar/File/Print').connect("activate", self.printing)
         self.uimanager.get_action('/MenuBar/Loans/Add').connect("activate", self.addloan)
         self.uimanager.get_action('/MenuBar/Loans/Edit').connect("activate", self.editloan)
         self.uimanager.get_action('/MenuBar/Loans/Del').connect("activate", self.delloan)
+        self.uimanager.get_action('/MenuBar/Help/About').connect("activate", self.aboutdialog)
         self.uimanager.get_action('/MenuBar/Loans/Edit').set_sensitive(False)
         self.uimanager.get_action('/MenuBar/Loans/Del').set_sensitive(False)
                 
@@ -62,7 +69,73 @@ class MainWindow(gtk.Window):
         self.add(vbox)
         self.resize(800, 600)
         self.show_all()
-    
+        
+    def draw_page (self, operation, context, page_number):
+        cr = context.get_cairo_context()
+        cr.set_source_rgb(0, 0, 0)
+
+        start_line = page_number * self.lines_per_page
+        if page_number + 1 != operation.props.n_pages:
+            end_line = start_line + self.lines_per_page
+        else:
+            end_line = self.layout.get_line_count()
+
+        print start_line, end_line
+        
+        cr.move_to(0, 0)
+
+        iter = self.layout.get_iter()
+        i=0
+        while 1:
+            if i > start_line:
+                line = iter.get_line()
+                print line.get_extents()
+                cr.rel_move_to(0, 6)
+                cr.show_layout_line(line)
+                print "i:",i
+            i += 1
+            if not (i < end_line and iter.next_line()):
+                break
+
+    def begin_print(self, operation, context):
+        width = context.get_width()
+        height = context.get_height()
+        self.layout = context.create_pango_layout()
+        print width, height
+
+        self.layout.set_font_description(pango.FontDescription("Sans 12"))
+        self.layout.set_width(int(width*pango.SCALE))
+        self.layout.set_text("Phone Repairer a\nPhone Repairer Phone Repairer\nPhone Repairer\nPhone Repairer")
+
+        num_lines = self.layout.get_line_count()
+        print "num_lines: ", num_lines
+        self.lines_per_page = math.floor(context.get_height() / 6)
+        print "lines_per_page: ", self.lines_per_page
+        #lines = self.layout.get_line_count()
+        pages = ( int(math.ceil( float(num_lines) / float(self.lines_per_page) ) ) )
+        operation.set_n_pages(pages)
+
+    def printing(self, *args):
+        print "printing"
+        
+        self.layout = None
+        self.font_size=12
+        self.lines_per_page=0
+        
+        setup = gtk.PageSetup()
+        #setup.set_orientation(gtk.PAGE_ORIENTATION_LANDSCAPE)
+        setup.set_paper_size(gtk.PaperSize(gtk.PAPER_NAME_A4))
+        
+        print_op = gtk.PrintOperation()
+        print_op.set_default_page_setup(setup)
+        print_op.set_unit(gtk.UNIT_MM)
+        
+        #print_op.set_n_pages(1)
+        print_op.connect("draw_page", self.draw_page)
+        print_op.connect("begin_print", self.begin_print)
+
+        res = print_op.run(gtk.PRINT_OPERATION_ACTION_PREVIEW)
+        
     def addloan(self, *args):
         dlg = AddLoanDlg(self, self.model)
         res = dlg.run()
@@ -101,5 +174,5 @@ class MainWindow(gtk.Window):
         gtk.main_quit()
         
     def aboutdialog(self, widget, data=None):
-        dlg = AboutDialog()
+        dlg = AboutDlg()
         dlg.run()
