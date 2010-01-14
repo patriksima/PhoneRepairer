@@ -9,6 +9,8 @@ class UIManager(gtk.UIManager):
     ui = '''<ui>
     <menubar name="MenuBar">
       <menu action="File">
+        <menuitem action="Export"/>
+        <separator/>
         <menuitem action="Print"/>
         <separator/>
         <menuitem action="Quit"/>
@@ -39,12 +41,13 @@ class UIManager(gtk.UIManager):
         gtk.UIManager.__init__(self)
         self.actiongroup = gtk.ActionGroup('UIBase')
         self.actions = (('File', None, '_File'),
+                            ('Export', None, 'Export', None, 'Export do CSV', None),
+                            ('Print', gtk.STOCK_PRINT, '_Print', '<CTRL>P', 'Print loans', None),
                             ('Quit', gtk.STOCK_QUIT, '_Quit', None, 'Quit', None),
                         ('Loans', None, '_Loans'),
                             ('Add', gtk.STOCK_ADD, '_Add', '<CTRL>A', 'Add loan', None),
                             ('Edit', gtk.STOCK_EDIT, '_Edit', '<CTRL>E', 'Edit loan', None),
                             ('Del', gtk.STOCK_DELETE, '_Del', '<CTRL>D', 'Delete loan', None),
-                            ('Print', gtk.STOCK_PRINT, '_Print', '<CTRL>P', 'Print loans', None),
                         ('Help', None, '_Help'),
                             ('About', gtk.STOCK_ABOUT, 'About', None, 'About app', None))
         self.actiongroup.add_actions(self.actions)

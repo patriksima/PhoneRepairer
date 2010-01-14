@@ -1,1 +1,14 @@
+info o servisu
+smluvni podminky
 
+zapujcka
+ - typ, imei, cena, bat, nab, jine
+
+oprava
+ - klient - jm,prijm,adrea, tel, email
+ - mobil - typ, imei, bat, nab, zarucak, jine, stav
+ - zapujcka
+ - dokonceni - popis zavady, odhad ceny, termin
+
+ext.servisy
+ - nazev, adresa, tel, fax, email, www, poznamka, kontaktni osoby?

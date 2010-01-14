@@ -17,6 +17,7 @@ from uimanager import UIManager
 from about import AboutDlg
 from addloan import AddLoanDlg
 from editloan import EditLoanDlg
+from export import ExportDlg
 
 class MainWindow(gtk.Window):
     def __init__(self):
@@ -28,19 +29,20 @@ class MainWindow(gtk.Window):
         self.connect("destroy", self.destroy)
         
         self.uimanager = UIManager()
-        
+
         accelgroup = self.uimanager.get_accel_group()
         self.add_accel_group(accelgroup)
         
         self.uimanager.get_action('/MenuBar/File/Quit').connect("activate", self.destroy)
         self.uimanager.get_action('/MenuBar/File/Print').connect("activate", self.printing)
+        self.uimanager.get_action('/MenuBar/File/Export').connect("activate", self.export)
         self.uimanager.get_action('/MenuBar/Loans/Add').connect("activate", self.addloan)
         self.uimanager.get_action('/MenuBar/Loans/Edit').connect("activate", self.editloan)
         self.uimanager.get_action('/MenuBar/Loans/Del').connect("activate", self.delloan)
         self.uimanager.get_action('/MenuBar/Help/About').connect("activate", self.aboutdialog)
         self.uimanager.get_action('/MenuBar/Loans/Edit').set_sensitive(False)
         self.uimanager.get_action('/MenuBar/Loans/Del').set_sensitive(False)
-                
+            
         vbox = gtk.VBox()
         
         menubar = self.uimanager.get_widget('/MenuBar')
@@ -69,7 +71,71 @@ class MainWindow(gtk.Window):
         self.add(vbox)
         self.resize(800, 600)
         self.show_all()
+     
+    def draw_page2 (self, operation, context, page_number):
+        cr = context.get_cairo_context()
+        #print self.view.get_column(0).get_cell_renderers()[0].get_property('family')
+        #print self.view.get_column(0).get_cell_renderers()[0].get_property('family-set')
+        #print self.view.get_column(0).get_cell_renderers()[0].get_property('font')
+        #print self.view.get_column(0).get_cell_renderers()[0].get_property('font-desc')
+        print context.get_width(),context.get_height()
+        x, y, width, height = self.view.get_visible_rect()
+        print width, height
+        print context.get_dpi_x(),context.get_dpi_y()
         
+        
+        
+        cr.move_to(0, 0)
+        
+        cols = self.view.get_columns()
+        font = pango.FontDescription("Sans 10")# cols[0].get_cell_renderers()[0].get_property('font-desc')
+        w = 0
+        h = 0
+        
+        sum = 0
+        for col in cols:
+            sum += col.get_width()
+        print sum
+        
+        r = context.get_width()/sum
+        
+        for i,col in enumerate(cols):
+            txt = col.get_title()
+            
+            for row in self.model:
+                txt += "\n" + str(row[i+1])
+                
+            layout = context.create_pango_layout()
+            layout.set_markup(txt)
+            layout.set_font_description(font)
+            #layout.set_spacing(0.5)
+            
+            w, h = layout.get_pixel_size()
+            
+            cr.layout_path(layout)
+            cr.rel_move_to(w+5, 0)
+
+        cr.fill()
+        
+        tabs = pango.TabArray(4, True)
+        tabs.set_tab(1, pango.TAB_LEFT, 60)
+        tabs.set_tab(2, pango.TAB_LEFT, 80)
+        tabs.set_tab(3, pango.TAB_LEFT, 70)
+        
+
+        """
+        w = 0
+        cr.move_to(0, 5)
+        for row in self.model:
+            l = context.create_pango_layout()
+            l.set_markup(row[1])
+            l.set_font_description(font)
+            l.set_width(cols[0].get_width()*r)
+            cr.rel_move_to(0, 5)
+            cr.layout_path(l)
+        cr.fill()
+        """
+                
     def draw_page (self, operation, context, page_number):
         cr = context.get_cairo_context()
 
@@ -152,7 +218,7 @@ class MainWindow(gtk.Window):
         self.lines_per_page=0
         
         setup = gtk.PageSetup()
-        #setup.set_orientation(gtk.PAGE_ORIENTATION_LANDSCAPE)
+        setup.set_orientation(gtk.PAGE_ORIENTATION_LANDSCAPE)
         setup.set_paper_size(gtk.PaperSize(gtk.PAPER_NAME_A4))
         
         print_op = gtk.PrintOperation()
@@ -161,9 +227,14 @@ class MainWindow(gtk.Window):
         
         #print_op.set_n_pages(1)
         print_op.connect("draw_page", self.draw_page)
+        print_op.connect("draw_page", self.draw_page2)
         print_op.connect("begin_print", self.begin_print)
 
         res = print_op.run(gtk.PRINT_OPERATION_ACTION_PREVIEW)
+     
+    def export(self, *args):
+        dlg = ExportDlg(self, self.model)
+        res = dlg.run()
         
     def addloan(self, *args):
         dlg = AddLoanDlg(self, self.model)

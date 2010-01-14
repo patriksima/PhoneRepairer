@@ -1,3 +1,21 @@
+commit 06579a7cc6827e9ac4155c12754726c156a95b0d
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Tue Jan 12 12:42:33 2010 +0100
+
+    print exp with cairo - ovx smile
+
+commit f032c6afd63766bd096c8637591e052311d1c6e0
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Tue Jan 12 11:52:39 2010 +0100
+
+    icons, help, print
+
+commit 25eb13144843bb9c36b24e17dce522006b8315b7
+Author: Patrik Šíma <patrik@ovx.cz>
+Date:   Fri Jan 8 23:38:52 2010 +0100
+
+    Changelog
+
 commit c4d2ec8f8c85c3da6ba81379744a4af07aa8cdbe
 Author: Patrik Šíma <patrik@ovx.cz>
 Date:   Fri Jan 8 23:34:05 2010 +0100
